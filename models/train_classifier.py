@@ -17,6 +17,17 @@ from sklearn.multioutput import MultiOutputClassifier
 import pickle
 
 def load_data(database_filepath):
+    '''
+    load_data
+    Read data from sqlite database stored at DisasterResponse table
+   
+    input:
+        database_filepath: Database file path 
+    returns:
+        X:Dataframe consisting messages
+        y:Datframe containing message labels
+        category_names: Message category
+    '''
     engine = create_engine('sqlite:///'+database_filepath)
     df = pd.read_sql_table('DisasterResponse', engine)
     X = df.message
@@ -26,6 +37,15 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    '''
+    tokenize
+    Take row message and apply cleaning, lemmatization and create tokens
+   
+    input:
+        text: row message 
+    returns:
+        clean_tokens:Tokenzied message
+    '''
     url_regex = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     detected_urls = re.findall(url_regex, text)
     for url in detected_urls:
@@ -43,6 +63,15 @@ def tokenize(text):
 
 
 def build_model():
+    '''
+    build_model
+    Create pipeline and build model using GridseachCV
+   
+    input:
+        None
+    returns:
+        model: built model 
+    '''
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -59,12 +88,34 @@ def build_model():
 
 
 def evaluate_model(model, X_test, y_test, category_names):
+    '''
+    evaluate_model
+    evaluate model performance and print 
+   
+    input:
+        Model: trained model
+        X_test: test data
+        y_test: test lables
+        category_names: actual lables message category
+    returns:
+        None
+    '''
     y_pred = model.predict(X_test)
     class_report = classification_report(y_test, y_pred, target_names=category_names)
     print(class_report)
 
 
 def save_model(model, model_filepath):
+    '''
+    save_model
+    save model as pickel object
+   
+    input:
+        Model: trained model
+        model_filepath: path where model to be saved
+    returns:
+        None
+    '''
     with open(model_filepath, 'wb') as file:
         pickle.dump(model, file)
 
